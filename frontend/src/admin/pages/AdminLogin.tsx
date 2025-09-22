@@ -44,7 +44,7 @@ const AdminLogin = () => {
         authLogin(response.data.user, response.data.token);
         
         // Navigate to admin dashboard
-        navigate('/admin');
+        window.location.href = '/admin';
       } else {
         setError('Invalid admin credentials');
       }

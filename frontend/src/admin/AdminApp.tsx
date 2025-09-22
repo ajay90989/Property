@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLogin from './pages/AdminLogin';
@@ -9,13 +9,12 @@ import AddProperty from './pages/AddProperty';
 
 const AdminApp = () => {
   return (
-    <Router>
-      <Routes>
+    <Routes>
         {/* Public routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="login" element={<AdminLogin />} />
         
         {/* Protected routes */}
-        <Route path="/admin" element={
+        <Route path="" element={
           <ProtectedRoute>
             <AdminLayout />
           </ProtectedRoute>
@@ -31,9 +30,8 @@ const AdminApp = () => {
         </Route>
         
         {/* Redirect any other admin routes to login */}
-        <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
-      </Routes>
-    </Router>
+        <Route path="*" element={<Navigate to="/admin/login" replace />} />
+    </Routes>
   );
 };
 

@@ -21,7 +21,7 @@ export function SignInPage({ onNavigate }: SignInPageProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
   // Form states
@@ -63,7 +63,8 @@ export function SignInPage({ onNavigate }: SignInPageProps) {
           console.log('Attempting navigation...');
           if (response.data!.user.role === 'admin') {
             console.log('Navigating to admin dashboard');
-            navigate('/admin');
+            // For admin, use window.location to navigate to admin route
+            window.location.href = '/admin';
           } else {
             console.log('Navigating to home page');
             onNavigate('home');

@@ -142,14 +142,14 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ marginLeft: '228px', marginTop: '50px' }}>
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome to your property management dashboard</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Management Dashboard</h1>
+          <p className="text-gray-600 text-lg">Welcome to your property management dashboard</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
           <Plus className="mr-2 h-4 w-4" />
           Add Property
         </Button>
@@ -160,16 +160,16 @@ const Dashboard = () => {
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
+            <Card key={index} className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0 shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                    <p className="text-xs text-green-600 mt-1">{stat.change} from last month</p>
+                    <p className="text-sm font-medium text-gray-600 mb-2">{stat.title}</p>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</p>
+                    <p className="text-xs text-green-600 font-semibold">{stat.change} from last month</p>
                   </div>
-                  <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                    <Icon className={`h-6 w-6 ${stat.color}`} />
+                  <div className={`p-4 rounded-full ${stat.bgColor} shadow-md`}>
+                    <Icon className={`h-7 w-7 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
@@ -179,45 +179,45 @@ const Dashboard = () => {
       </div>
 
       {/* Revenue Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <DollarSign className="mr-2 h-5 w-5" />
+      <Card className="shadow-lg border-0">
+        <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+          <CardTitle className="flex items-center text-green-800">
+            <DollarSign className="mr-2 h-6 w-6" />
             Monthly Revenue
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold text-green-600">
+        <CardContent className="p-6">
+          <div className="text-4xl font-bold text-green-600 mb-2">
             {formatPrice(stats.monthlyRevenue)}
           </div>
-          <p className="text-sm text-gray-600 mt-1">+18% from last month</p>
+          <p className="text-sm text-gray-600 font-semibold">+18% from last month</p>
         </CardContent>
       </Card>
 
       {/* Recent Properties */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Properties</CardTitle>
+      <Card className="shadow-lg border-0">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardTitle className="text-blue-800">Recent Properties</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="space-y-4">
             {stats.recentProperties.map((property) => (
-              <div key={property.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+              <div key={property.id} className="flex items-center justify-between p-6 border border-gray-200 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all duration-200">
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{property.title}</h3>
-                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                    <MapPin className="mr-1 h-4 w-4" />
+                  <h3 className="font-semibold text-gray-900 text-lg mb-2">{property.title}</h3>
+                  <div className="flex items-center text-sm text-gray-600 mb-1">
+                    <MapPin className="mr-2 h-4 w-4 text-blue-500" />
                     {property.location}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 mt-1">
-                    <Calendar className="mr-1 h-4 w-4" />
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar className="mr-2 h-4 w-4 text-gray-400" />
                     {new Date(property.createdAt).toLocaleDateString()}
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-6">
                   <div className="text-right">
-                    <div className="font-semibold text-gray-900">{formatPrice(property.price)}</div>
-                    <div className="text-sm text-gray-600">{property.views} views</div>
+                    <div className="font-bold text-gray-900 text-lg">{formatPrice(property.price)}</div>
+                    <div className="text-sm text-gray-600 font-medium">{property.views} views</div>
                   </div>
                   {getStatusBadge(property.status)}
                 </div>

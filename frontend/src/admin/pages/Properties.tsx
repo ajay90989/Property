@@ -186,21 +186,21 @@ const Properties = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ marginLeft: '228px', marginTop: '50px' }}>
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Properties</h1>
-          <p className="text-gray-600 mt-1">Manage your property listings</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Properties</h1>
+          <p className="text-gray-600 text-lg">Manage your property listings</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
           <Plus className="mr-2 h-4 w-4" />
           Add Property
         </Button>
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="shadow-lg border-0">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -210,12 +210,12 @@ const Properties = () => {
                   placeholder="Search properties..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full md:w-48 border-gray-300 focus:border-blue-500">
                 <SelectValue placeholder="Property Type" />
               </SelectTrigger>
               <SelectContent>
@@ -228,7 +228,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full md:w-48 border-gray-300 focus:border-blue-500">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -237,7 +237,7 @@ const Properties = () => {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button variant="outline" className="border-gray-300 hover:bg-gray-50">
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
@@ -246,28 +246,28 @@ const Properties = () => {
       </Card>
 
       {/* Properties Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Property Listings ({filteredProperties.length})</CardTitle>
+      <Card className="shadow-lg border-0">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardTitle className="text-blue-800">Property Listings ({filteredProperties.length})</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Views</TableHead>
-                  <TableHead>Actions</TableHead>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="font-semibold text-gray-700">Property</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Type</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Price</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Location</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Details</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Status</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Views</TableHead>
+                  <TableHead className="font-semibold text-gray-700">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredProperties.map((property) => (
-                  <TableRow key={property.id}>
+                  <TableRow key={property.id} className="hover:bg-gray-50 transition-colors">
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -368,8 +368,8 @@ const Properties = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6">
-              <div className="text-sm text-gray-700">
+            <div className="flex items-center justify-between mt-6 p-6 bg-gray-50">
+              <div className="text-sm text-gray-700 font-medium">
                 Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, filteredProperties.length)} of {filteredProperties.length} results
               </div>
               <div className="flex space-x-2">
@@ -378,6 +378,7 @@ const Properties = () => {
                   size="sm"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(currentPage - 1)}
+                  className="border-gray-300 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Previous
                 </Button>
@@ -386,6 +387,7 @@ const Properties = () => {
                   size="sm"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(currentPage + 1)}
+                  className="border-gray-300 hover:bg-gray-50 disabled:opacity-50"
                 >
                   Next
                 </Button>
