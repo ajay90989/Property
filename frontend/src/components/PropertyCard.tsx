@@ -1,7 +1,7 @@
-import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { MapPin, Bed, Bath, Square, Heart, Share2, Star } from "lucide-react";
+import { getImageUrl } from "../config/api";
 
 interface PropertyCardProps {
   id: string;
@@ -54,12 +54,15 @@ export function PropertyCard({
               console.error('Error event:', e);
               // Try alternative URL if first fails
               if (image && image.includes('/uploads/')) {
-                const altSrc = `http://localhost:5000/uploads/${image.split('/').pop()}`;
+                const altSrc = getImageUrl(`/uploads/${image.split('/').pop()}`);
                 e.currentTarget.src = altSrc;
                 e.currentTarget.onerror = () => {
                   console.error('Alternative URL also failed');
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling.style.display = 'flex';
+                  const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (nextElement) {
+                    nextElement.style.display = 'flex';
+                  }
                 };
               }
             }}

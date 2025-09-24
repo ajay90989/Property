@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { getImageUrl } from '../../config/api';
 import { 
   Table, 
   TableBody, 
@@ -463,49 +464,53 @@ const BlogManagement = () => {
                     return (
                     <TableRow key={blog._id || blog.id} className="hover:bg-gray-50 transition-colors">
                     <TableCell>
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border-2 border-blue-500">
+                      <div className="relative w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden shadow-md">
                         {blog.featuredImage?.url ? (
-                          <div className="relative">
-                            <img
-                              src={`http://localhost:5000${blog.featuredImage.url}`}
-                          
+                          <img 
+                            src={getImageUrl(blog.featuredImage.url)}
                             alt={blog.featuredImage.alt || blog.title}
-                            className="w-full h-full object-cover rounded-lg"
-                            style={{
-                              display: 'block',
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              borderRadius: '8px'
-                            }}
+                            className="w-full h-full object-cover"
+                            crossOrigin="anonymous"
                             onError={(e) => {
                               console.log('Image load error for blog:', blog.title);
                               console.log('Original URL:', blog.featuredImage?.url);
-                              console.log('Constructed URL:', blog.featuredImage?.url?.startsWith('http') 
-                                ? blog.featuredImage.url 
-                                : `http://localhost:5000${blog.featuredImage?.url}`);
-                              // Show fallback image
-                              e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI0IDI0SDQwVjQwSDI0VjI0WiIgZmlsbD0iI0U1RTdFQiIvPgo8L3N2Zz4K';
-                              e.currentTarget.alt = 'Image failed to load';
+                              console.log('Constructed URL:', getImageUrl(blog.featuredImage.url));
+                              
+                              // Try alternative URL construction
+                              let altSrc;
+                              if (blog.featuredImage.url.includes('/uploads/')) {
+                                altSrc = getImageUrl(`/uploads/${blog.featuredImage.url.split('/').pop()}`);
+                              } else {
+                                altSrc = getImageUrl(`/uploads/${blog.featuredImage.url}`);
+                              }
+                              console.log('Alternative URL:', altSrc);
+                              e.currentTarget.src = altSrc;
+                              e.currentTarget.onerror = () => {
+                                console.log('Alternative URL also failed, showing fallback');
+                                e.currentTarget.style.display = 'none';
+                                const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                                if (nextElement) {
+                                  nextElement.style.display = 'flex';
+                                }
+                              };
                             }}
                             onLoad={(e) => {
                               console.log('Image loaded successfully for blog:', blog.title);
-                              console.log('Image element:', e.currentTarget);
-                              console.log('Image dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
-                              console.log('Image display style:', window.getComputedStyle(e.currentTarget).display);
-                              console.log('Image visibility:', window.getComputedStyle(e.currentTarget).visibility);
+                              console.log('Image URL:', e.currentTarget.src);
                             }}
                           />
-                          {/* Test with a simple image */}
-                          <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-xs flex items-center justify-center">
-                            T
+                        ) : null}
+                        <div 
+                          className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
+                          style={{ display: blog.featuredImage?.url ? 'none' : 'flex' }}
+                        >
+                          <div className="text-gray-400 text-xs text-center">
+                            <div className="w-6 h-6 mx-auto mb-1 bg-gray-300 rounded flex items-center justify-center">
+                              <FileText className="w-4 h-4" />
+                            </div>
+                            <div className="text-xs">No Image</div>
                           </div>
-                          </div>
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                            <FileText className="h-6 w-6 text-gray-400" />
-                          </div>
-                        )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>

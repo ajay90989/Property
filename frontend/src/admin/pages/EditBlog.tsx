@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { getImageUrl } from '../../config/api';
 import {
   Select,
   SelectContent,
@@ -256,9 +257,36 @@ const EditBlog = () => {
                 ) : currentImageUrl ? (
                   <div className="relative">
                     <img
-                      src={`http://localhost:5000${currentImageUrl}`}
+                      src={getImageUrl(currentImageUrl)}
                       alt="Current"
                       className="w-full h-64 object-cover rounded-lg"
+                      crossOrigin="anonymous"
+                      onError={(e) => {
+                        console.log('Image load error for current image:', currentImageUrl);
+                        console.log('Constructed URL:', getImageUrl(currentImageUrl));
+                        
+                        // Try alternative URL construction
+                        let altSrc;
+                        if (currentImageUrl.includes('/uploads/')) {
+                          altSrc = getImageUrl(`/uploads/${currentImageUrl.split('/').pop()}`);
+                        } else {
+                          altSrc = getImageUrl(`/uploads/${currentImageUrl}`);
+                        }
+                        console.log('Alternative URL:', altSrc);
+                        e.currentTarget.src = altSrc;
+                        e.currentTarget.onerror = () => {
+                          console.log('Alternative URL also failed, showing fallback');
+                          e.currentTarget.style.display = 'none';
+                          const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (nextElement) {
+                            nextElement.style.display = 'flex';
+                          }
+                        };
+                      }}
+                      onLoad={(e) => {
+                        console.log('Image loaded successfully for current image');
+                        console.log('Image URL:', e.currentTarget.src);
+                      }}
                     />
                     <Button
                       type="button"
@@ -269,6 +297,16 @@ const EditBlog = () => {
                     >
                       <X className="h-4 w-4" />
                     </Button>
+                    {/* Fallback placeholder */}
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg"
+                      style={{ display: 'none' }}
+                    >
+                      <div className="text-center">
+                        <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">Image failed to load</p>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">

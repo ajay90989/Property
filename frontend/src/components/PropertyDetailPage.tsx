@@ -22,6 +22,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { propertyService, Property } from "../services/propertyService";
 import { useAuth } from "../contexts/AuthContext";
+import { getImageUrl } from "../config/api";
 
 interface PropertyDetailPageProps {
   propertyId?: string;
@@ -161,7 +162,7 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
                 <div className="aspect-video overflow-hidden">
                   {property.images && property.images.length > 0 ? (
                     <img
-                      src={`http://localhost:5000${property.images[currentImageIndex].url}`}
+                      src={getImageUrl(property.images[currentImageIndex].url)}
                       alt={property.title}
                       className="w-full h-full object-cover"
                       crossOrigin="anonymous"
@@ -258,7 +259,7 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
                         }`}
                       >
                         <img
-                          src={`http://localhost:5000${image.url}`}
+                          src={getImageUrl(image.url)}
                           alt={`View ${index + 1}`}
                           className="w-full h-full object-cover"
                           crossOrigin="anonymous"

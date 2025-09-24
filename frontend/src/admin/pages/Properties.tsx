@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { getImageUrl } from '../../config/api';
 import { 
   Table, 
   TableBody, 
@@ -419,17 +420,20 @@ const Properties = () => {
                         <div className="relative w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden shadow-md">
                           {property.images && property.images.length > 0 ? (
                             <img 
-                              src={`http://localhost:5000${property.images[0].url}`}
+                              src={getImageUrl(property.images[0].url)}
                               alt={property.title}
                               className="w-full h-full object-cover"
                               crossOrigin="anonymous"
                               onError={(e) => {
                           
-                                const altSrc = `http://localhost:5000/uploads/${property.images[0].url.split('/').pop()}`;
+                                const altSrc = getImageUrl(`/uploads/${property.images[0].url.split('/').pop()}`);
                                 e.currentTarget.src = altSrc;
                                 e.currentTarget.onerror = () => {
                                   e.currentTarget.style.display = 'none';
-                                  e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                                  if (nextElement) {
+                                    nextElement.style.display = 'flex';
+                                  }
                                 };
                               }}
                               onLoad={() => {

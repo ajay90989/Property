@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { getImageUrl } from '../../config/api';
 import { 
   Select, 
   SelectContent, 
@@ -363,7 +364,7 @@ const PropertyListingPage = () => {
               <Card key={property._id} className="group hover:shadow-lg transition-shadow duration-300">
                 <div className="relative">
                   <img
-                    src={property.images[0]?.url ? `http://localhost:5000${property.images[0].url}` : '/placeholder.jpg'}
+                    src={property.images[0]?.url ? getImageUrl(property.images[0].url) : '/placeholder.jpg'}
                     alt={property.title}
                     className="w-full h-48 object-cover rounded-t-lg"
                   />

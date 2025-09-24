@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { propertyService } from "../services/propertyService";
+import { getImageUrl } from "../config/api";
 
 interface Property {
   _id: string;
@@ -119,7 +120,7 @@ export function FeaturedProperties({ onNavigate, showResults = false, filters }:
                   : property.location?.city || property.location?.state || 'Location not specified'}
                 price={`₹${(property.price).toFixed(1)}L`}
                 image={property.images && property.images.length > 0 ? 
-                  `http://localhost:5000${property.images[0].url}` : 
+                  getImageUrl(property.images[0].url) : 
                   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&h=300&fit=crop&crop=center'}
                 beds={property.bedrooms}
                 baths={property.bathrooms}

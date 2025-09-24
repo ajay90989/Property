@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getImageUrl } from '../../config/api';
 import {
   Eye,
   Tag,
@@ -163,9 +164,7 @@ const BlogListingPage = () => {
                   {blog.featuredImage?.url ? (
                     <img
                       src={
-                        blog.featuredImage.url.startsWith('http')
-                          ? blog.featuredImage.url
-                          : `http://localhost:5000${blog.featuredImage.url}`
+                        getImageUrl(blog.featuredImage.url)
                       }
                       alt={blog.featuredImage.alt || blog.title}
                       className="w-full h-full object-cover rounded-t-2xl group-hover:scale-105 transition-transform duration-700"

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { API_BASE_URL } from '../../config/api';
 import { 
   Table, 
   TableBody, 
@@ -108,7 +109,7 @@ const UserManagement = () => {
 
   const testDirectAPI = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
