@@ -12,15 +12,13 @@ import { UserLoginApi, UserRegisterApi } from "../../Service/Auth";
 import { LoginData } from "../../Service/Auth";
 
 
-interface SignInPageProps {
-  onNavigate: (page: string, id?: string) => void;
-}
-
-export function SignInPage({ onNavigate }: SignInPageProps) {
+export function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -52,22 +50,17 @@ export function SignInPage({ onNavigate }: SignInPageProps) {
       });
       
       if (response.success && response.data) {
-        console.log('Login successful, user data:', response.data.user);
-        console.log('User role:', response.data.user.role);
         
         // Update auth context
         authLogin(response.data.user, response.data.token);
         
-        // Navigate based on role
+        // Navigate based on user role
         setTimeout(() => {
-          console.log('Attempting navigation...');
           if (response.data!.user.role === 'admin') {
-            console.log('Navigating to admin dashboard');
             // For admin, use window.location to navigate to admin route
             window.location.href = '/admin';
           } else {
-            console.log('Navigating to home page');
-            onNavigate('home');
+            navigate('/');
           }
         }, 100);
       }
@@ -95,25 +88,43 @@ export function SignInPage({ onNavigate }: SignInPageProps) {
       const response = await UserRegisterApi(userData);
       
       if (response.success && response.data) {
-        // Update auth context
-        authLogin(response.data.user, response.data.token);
+        // Show success message
+        setSuccessMessage('Registration successful! Please login with your credentials.');
+        setErrorMessage('');
         
-        // Navigate to home page
-        setTimeout(() => {
-          onNavigate('home');
-        }, 100);
+        // Switch to sign in tab
+        setActiveTab('signin');
+        
+        // Clear signup form
+        setSignUpData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          password: "",
+          confirmPassword: "",
+          agreeTerms: false,
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign up error:', error);
+      setErrorMessage(error.response?.data?.message || 'Registration failed. Please try again.');
+      setSuccessMessage('');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSocialLogin = (provider: string) => {
-    console.log(`${provider} login clicked`);
     // Handle social login logic here
-    onNavigate('home');
+        navigate('/');
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Clear messages when switching tabs
+    setSuccessMessage('');
+    setErrorMessage('');
   };
 
   return (
@@ -135,11 +146,25 @@ export function SignInPage({ onNavigate }: SignInPageProps) {
           </CardHeader>
           
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
+
+              {/* Success/Error Messages */}
+              {successMessage && (
+                <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {successMessage}
+                </div>
+              )}
+              
+              {errorMessage && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
+                  {errorMessage}
+                </div>
+              )}
 
               {/* Sign In Tab */}
               <TabsContent value="signin" className="space-y-4">
@@ -409,7 +434,7 @@ export function SignInPage({ onNavigate }: SignInPageProps) {
             {/* Back to Home Link */}
             <div className="text-center mt-6 pt-4 border-t">
               <button
-                onClick={() => onNavigate('home')}
+                onClick={() => navigate('/')}
                 className="text-sm text-gray-500 hover:text-[#1E73BE] transition-colors"
               >
                 ← Back to Home

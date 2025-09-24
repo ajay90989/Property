@@ -12,6 +12,7 @@ import {
   MapPin,
   Calendar
 } from 'lucide-react';
+import { adminService } from '../../services/adminService';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -26,46 +27,75 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setStats({
-        totalProperties: 156,
-        activeProperties: 142,
-        totalUsers: 89,
-        totalViews: 2847,
-        monthlyRevenue: 125000,
-        recentProperties: [
-          {
-            id: 1,
-            title: "Luxury Villa in Mumbai",
-            price: 25000000,
-            location: "Bandra West, Mumbai",
-            status: "active",
-            views: 45,
-            createdAt: "2024-01-15"
-          },
-          {
-            id: 2,
-            title: "3BHK Apartment in Delhi",
-            price: 8500000,
-            location: "Gurgaon, Delhi",
-            status: "active",
-            views: 32,
-            createdAt: "2024-01-14"
-          },
-          {
-            id: 3,
-            title: "Commercial Space in Bangalore",
-            price: 15000000,
-            location: "Whitefield, Bangalore",
-            status: "pending",
-            views: 18,
-            createdAt: "2024-01-13"
-          }
-        ]
-      });
-      setLoading(false);
-    }, 1000);
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getDashboardData('30d');
+        
+        if (response.success) {
+          const data = response.data;
+          setStats({
+            totalProperties: data.overview.totalProperties,
+            activeProperties: data.overview.activeProperties,
+            totalUsers: data.overview.totalUsers,
+            totalViews: data.pageViews.reduce((sum: number, item: any) => sum + item.count, 0),
+            monthlyRevenue: 125000, // This would come from a separate revenue calculation
+            recentProperties: data.propertyViews.slice(0, 3).map((property: any) => ({
+              id: property.propertyId,
+              title: property.title,
+              price: 0, // Price would need to be fetched separately
+              location: "Location", // Location would need to be fetched separately
+              status: "active",
+              views: property.views,
+              createdAt: new Date().toISOString()
+            }))
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        // Fallback to demo data
+        setStats({
+          totalProperties: 156,
+          activeProperties: 142,
+          totalUsers: 89,
+          totalViews: 2847,
+          monthlyRevenue: 125000,
+          recentProperties: [
+            {
+              id: 1,
+              title: "Luxury Villa in Mumbai",
+              price: 25000000,
+              location: "Bandra West, Mumbai",
+              status: "active",
+              views: 45,
+              createdAt: "2024-01-15"
+            },
+            {
+              id: 2,
+              title: "3BHK Apartment in Delhi",
+              price: 8500000,
+              location: "Gurgaon, Delhi",
+              status: "active",
+              views: 32,
+              createdAt: "2024-01-14"
+            },
+            {
+              id: 3,
+              title: "Commercial Space in Bangalore",
+              price: 15000000,
+              location: "Whitefield, Bangalore",
+              status: "pending",
+              views: 18,
+              createdAt: "2024-01-13"
+            }
+          ]
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   const statCards = [
@@ -149,10 +179,7 @@ const Dashboard = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Management Dashboard</h1>
           <p className="text-gray-600 text-lg">Welcome to your property management dashboard</p>
         </div>
-        <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Property
-        </Button>
+       
       </div>
 
       {/* Stats Cards */}
@@ -194,38 +221,8 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Recent Properties */}
-      <Card className="shadow-lg border-0">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
-          <CardTitle className="text-blue-800">Recent Properties</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {stats.recentProperties.map((property) => (
-              <div key={property.id} className="flex items-center justify-between p-6 border border-gray-200 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all duration-200">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 text-lg mb-2">{property.title}</h3>
-                  <div className="flex items-center text-sm text-gray-600 mb-1">
-                    <MapPin className="mr-2 h-4 w-4 text-blue-500" />
-                    {property.location}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="mr-2 h-4 w-4 text-gray-400" />
-                    {new Date(property.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-6">
-                  <div className="text-right">
-                    <div className="font-bold text-gray-900 text-lg">{formatPrice(property.price)}</div>
-                    <div className="text-sm text-gray-600 font-medium">{property.views} views</div>
-                  </div>
-                  {getStatusBadge(property.status)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+     
+    
     </div>
   );
 };

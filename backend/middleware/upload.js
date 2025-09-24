@@ -41,10 +41,26 @@ const upload = multer({
 });
 
 // Single file upload
-const uploadSingle = upload.single('image');
+const uploadSingle = (req, res, next) => {
+  
+    upload.single('featuredImage')(req, res, (err) => {
+        if (err) {
+            console.error('Upload error:', err);
+            return next(err);
+        }
+
+
+
+        next();
+    });
+};
 
 // Multiple files upload
-const uploadMultiple = upload.array('images', 10);
+const uploadMultiple = upload.fields([
+    { name: 'images', maxCount: 10 },
+    { name: 'profileImage', maxCount: 1 },
+    { name: 'coverImage', maxCount: 1 }
+]);
 
 // Error handling middleware for multer
 const handleUploadError = (err, req, res, next) => {

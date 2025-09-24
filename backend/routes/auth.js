@@ -7,15 +7,15 @@ const {
     updateProfile,
     changePassword
 } = require('../controllers/authController');
-const { protect } = require('../middleware/auth');
+// Authentication middleware removed
 
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
 
-// Protected routes
-router.get('/me', protect, getMe);
-router.put('/profile', protect, updateProfile);
-router.put('/change-password', protect, changePassword);
+// Public routes (No authentication required)
+router.get('/me', getMe);
+router.put('/profile', updateProfile);
+router.put('/change-password', changePassword);
 
 module.exports = router;

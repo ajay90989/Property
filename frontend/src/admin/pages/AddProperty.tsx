@@ -24,6 +24,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { adminService } from '../../services/adminService';
 
 const AddProperty = () => {
   const navigate = useNavigate();
@@ -64,6 +65,7 @@ const AddProperty = () => {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const propertyTypes = [
     'apartment', 'house', 'villa', 'plot', 'commercial', 'office', 'shop', 'warehouse'
@@ -100,6 +102,14 @@ const AddProperty = () => {
         [field]: value
       }));
     }
+
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,38 +138,113 @@ const AddProperty = () => {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    // Required fields validation
+    if (!formData.title.trim()) newErrors.title = 'Property title is required';
+    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!formData.propertyType) newErrors.propertyType = 'Property type is required';
+    if (!formData.listingType) newErrors.listingType = 'Listing type is required';
+    if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Valid price is required';
+    if (!formData.area.value || parseFloat(formData.area.value) <= 0) newErrors.area = 'Valid area is required';
+    if (!formData.location.address.trim()) newErrors.address = 'Address is required';
+    if (!formData.location.city.trim()) newErrors.city = 'City is required';
+    if (!formData.location.state.trim()) newErrors.state = 'State is required';
+    if (!formData.location.pincode.trim()) newErrors.pincode = 'Pincode is required';
+    if (!formData.contact.name.trim()) newErrors.contactName = 'Contact name is required';
+    if (!formData.contact.phone.trim()) newErrors.contactPhone = 'Contact phone is required';
+    if (!formData.contact.email.trim()) newErrors.contactEmail = 'Contact email is required';
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.contact.email && !emailRegex.test(formData.contact.email)) {
+      newErrors.contactEmail = 'Please enter a valid email address';
+    }
+
+    // Phone validation
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (formData.contact.phone && !phoneRegex.test(formData.contact.phone.replace(/\D/g, ''))) {
+      newErrors.contactPhone = 'Please enter a valid 10-digit phone number';
+    }
+
+    // Pincode validation
+    const pincodeRegex = /^[1-9][0-9]{5}$/;
+    if (formData.location.pincode && !pincodeRegex.test(formData.location.pincode)) {
+      newErrors.pincode = 'Please enter a valid 6-digit pincode';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setErrors({});
 
     try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      
-      // Add form data
-      Object.entries(formData).forEach(([key, value]) => {
-        if (typeof value === 'object' && value !== null) {
-          submitData.append(key, JSON.stringify(value));
-        } else {
-          submitData.append(key, value.toString());
+      // Prepare property data
+      const propertyData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        propertyType: formData.propertyType,
+        listingType: formData.listingType,
+        price: parseFloat(formData.price),
+        area: {
+          value: parseFloat(formData.area.value),
+          unit: formData.area.unit
+        },
+        bedrooms: parseInt(formData.bedrooms) || 0,
+        bathrooms: parseInt(formData.bathrooms) || 0,
+        floors: parseInt(formData.floors) || 1,
+        facing: formData.facing || undefined,
+        age: parseInt(formData.age) || 0,
+        furnished: formData.furnished,
+        parking: parseInt(formData.parking) || 0,
+        balcony: parseInt(formData.balcony) || 0,
+        amenities: formData.amenities,
+        location: {
+          address: formData.location.address.trim(),
+          city: formData.location.city.trim(),
+          state: formData.location.state.trim(),
+          pincode: formData.location.pincode.trim(),
+          landmark: formData.location.landmark.trim() || undefined
+        },
+        contact: {
+          name: formData.contact.name.trim(),
+          phone: formData.contact.phone.trim(),
+          email: formData.contact.email.trim(),
+          whatsapp: formData.contact.whatsapp.trim() || undefined
         }
-      });
+      };
 
-      // Add images
-      images.forEach((image, index) => {
-        submitData.append('images', image);
-      });
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      console.log('Property data:', formData);
-      console.log('Images:', images);
+      // Create property using admin service
+      const response = await adminService.createProperty(propertyData, images);
       
-      // Navigate back to properties list
-      navigate('/admin/properties');
-    } catch (error) {
+      
+      if (response.success) {
+        // Navigate back to properties list
+        navigate('/admin/properties');
+      } else {
+        throw new Error(response.message || 'Failed to create property');
+      }
+    } catch (error: any) {
       console.error('Error creating property:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response
+      });
+      setErrors({ submit: error.message || 'Failed to create property. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -183,6 +268,18 @@ const AddProperty = () => {
         </div>
       </div>
 
+      {/* Validation Summary */}
+      {Object.keys(errors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <h3 className="text-red-800 font-medium mb-2">Please fix the following errors:</h3>
+          <ul className="text-red-600 text-sm space-y-1">
+            {Object.entries(errors).map(([field, message]) => (
+              <li key={field}>• {message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <Card>
@@ -195,14 +292,18 @@ const AddProperty = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="title">Property Title *</Label>
+                <Label htmlFor="title" className="text-gray-700 font-medium">
+                  Property Title <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="Enter property title"
                   required
+                  className={errors.title ? 'border-red-500' : ''}
                 />
+                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
               </div>
               <div>
                 <Label htmlFor="propertyType">Property Type *</Label>
@@ -210,7 +311,7 @@ const AddProperty = () => {
                   value={formData.propertyType} 
                   onValueChange={(value) => handleInputChange('propertyType', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.propertyType ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Select property type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -221,6 +322,7 @@ const AddProperty = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.propertyType && <p className="text-red-500 text-sm mt-1">{errors.propertyType}</p>}
               </div>
             </div>
 
@@ -233,7 +335,9 @@ const AddProperty = () => {
                 placeholder="Describe the property in detail"
                 rows={4}
                 required
+                className={errors.description ? 'border-red-500' : ''}
               />
+              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -243,7 +347,7 @@ const AddProperty = () => {
                   value={formData.listingType} 
                   onValueChange={(value) => handleInputChange('listingType', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.listingType ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Select listing type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -254,6 +358,7 @@ const AddProperty = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.listingType && <p className="text-red-500 text-sm mt-1">{errors.listingType}</p>}
               </div>
               <div>
                 <Label htmlFor="price">Price *</Label>
@@ -261,14 +366,15 @@ const AddProperty = () => {
                   <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
                     id="price"
-                    type="number"
+                    type="text"
                     value={formData.price}
                     onChange={(e) => handleInputChange('price', e.target.value)}
                     placeholder="Enter price"
-                    className="pl-10"
+                    className={`pl-10 ${errors.price ? 'border-red-500' : ''}`}
                     required
                   />
                 </div>
+                {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
               </div>
               <div>
                 <Label htmlFor="furnished">Furnished Status</Label>
@@ -357,6 +463,7 @@ const AddProperty = () => {
                     onChange={(e) => handleInputChange('area.value', e.target.value)}
                     placeholder="Area value"
                     required
+                    className={errors.area ? 'border-red-500' : ''}
                   />
                   <Select 
                     value={formData.area.unit} 
@@ -372,6 +479,7 @@ const AddProperty = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                {errors.area && <p className="text-red-500 text-sm mt-1">{errors.area}</p>}
               </div>
               <div>
                 <Label htmlFor="facing">Facing</Label>
@@ -435,7 +543,9 @@ const AddProperty = () => {
                 placeholder="Enter complete address"
                 rows={2}
                 required
+                className={errors.address ? 'border-red-500' : ''}
               />
+              {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
@@ -446,7 +556,9 @@ const AddProperty = () => {
                   onChange={(e) => handleInputChange('location.city', e.target.value)}
                   placeholder="Enter city"
                   required
+                  className={errors.city ? 'border-red-500' : ''}
                 />
+                {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
               </div>
               <div>
                 <Label htmlFor="state">State *</Label>
@@ -456,7 +568,9 @@ const AddProperty = () => {
                   onChange={(e) => handleInputChange('location.state', e.target.value)}
                   placeholder="Enter state"
                   required
+                  className={errors.state ? 'border-red-500' : ''}
                 />
+                {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
               </div>
               <div>
                 <Label htmlFor="pincode">Pincode *</Label>
@@ -466,7 +580,9 @@ const AddProperty = () => {
                   onChange={(e) => handleInputChange('location.pincode', e.target.value)}
                   placeholder="Enter pincode"
                   required
+                  className={errors.pincode ? 'border-red-500' : ''}
                 />
+                {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
               </div>
               <div>
                 <Label htmlFor="landmark">Landmark</Label>
@@ -496,7 +612,9 @@ const AddProperty = () => {
                   onChange={(e) => handleInputChange('contact.name', e.target.value)}
                   placeholder="Enter contact person name"
                   required
+                  className={errors.contactName ? 'border-red-500' : ''}
                 />
+                {errors.contactName && <p className="text-red-500 text-sm mt-1">{errors.contactName}</p>}
               </div>
               <div>
                 <Label htmlFor="contactPhone">Phone *</Label>
@@ -506,7 +624,9 @@ const AddProperty = () => {
                   onChange={(e) => handleInputChange('contact.phone', e.target.value)}
                   placeholder="Enter phone number"
                   required
+                  className={errors.contactPhone ? 'border-red-500' : ''}
                 />
+                {errors.contactPhone && <p className="text-red-500 text-sm mt-1">{errors.contactPhone}</p>}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -519,7 +639,9 @@ const AddProperty = () => {
                   onChange={(e) => handleInputChange('contact.email', e.target.value)}
                   placeholder="Enter email address"
                   required
+                  className={errors.contactEmail ? 'border-red-500' : ''}
                 />
+                {errors.contactEmail && <p className="text-red-500 text-sm mt-1">{errors.contactEmail}</p>}
               </div>
               <div>
                 <Label htmlFor="whatsapp">WhatsApp</Label>
@@ -619,6 +741,13 @@ const AddProperty = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Error Message */}
+        {errors.submit && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <p className="text-red-600 text-sm">{errors.submit}</p>
+          </div>
+        )}
 
         {/* Submit Button */}
         <div className="flex justify-end space-x-4">

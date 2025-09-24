@@ -7,22 +7,26 @@ const {
     updateProperty,
     deleteProperty,
     togglePropertyStatus,
+    testToggleProperty,
     getFeaturedProperties,
-    getPropertiesByOwner
+    getPropertiesByOwner,
+    getFilterOptions
 } = require('../controllers/propertyController');
-const { protect, isAdmin } = require('../middleware/auth');
-const { uploadMultiple, handleUploadError } = require('../middleware/upload');
+// const { protect, isAdmin } = require('../middleware/auth');
+const { uploadMultiple } = require('../middleware/upload');
 
 // Public routes
 router.get('/', getProperties);
+router.get('/filter-options', getFilterOptions);
 router.get('/featured', getFeaturedProperties);
 router.get('/owner/:ownerId', getPropertiesByOwner);
 router.get('/:id', getProperty);
 
-// Protected routes (Admin only)
-router.post('/', protect, isAdmin, uploadMultiple, handleUploadError, createProperty);
-router.put('/:id', protect, isAdmin, uploadMultiple, handleUploadError, updateProperty);
-router.delete('/:id', protect, isAdmin, deleteProperty);
-router.patch('/:id/toggle', protect, isAdmin, togglePropertyStatus);
+// Public routes (No authentication required)
+router.post('/', uploadMultiple, createProperty);
+router.put('/:id', uploadMultiple, updateProperty);
+router.delete('/:id', deleteProperty);
+router.get('/:id/test-toggle', testToggleProperty);
+router.patch('/:id/toggle', togglePropertyStatus);
 
 module.exports = router;

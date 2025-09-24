@@ -6,11 +6,14 @@ const ERROR_IMG_SRC =
 export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElement>) {
   const [didError, setDidError] = useState(false)
 
-  const handleError = () => {
+  const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('ImageWithFallback - Image failed to load:', props.src);
+    console.error('Error event:', e);
     setDidError(true)
   }
 
   const { src, alt, style, className, ...rest } = props
+
 
   return didError ? (
     <div
@@ -22,6 +25,14 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
       </div>
     </div>
   ) : (
-    <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
+    <img 
+      src={src} 
+      alt={alt} 
+      className={className} 
+      style={style} 
+      {...rest} 
+      onError={handleError}
+      onLoad={() => {}}
+    />
   )
 }

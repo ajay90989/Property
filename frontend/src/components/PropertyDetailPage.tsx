@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -10,106 +11,129 @@ import {
   Phone, 
   Mail,
   Calendar,
-  Star,
   ChevronLeft,
   ChevronRight,
-  Car,
-  Wifi,
-  Shield,
   TreePine,
-  Camera
+  Camera,
+  Lock
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Avatar } from "./ui/avatar";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { propertyService, Property } from "../services/propertyService";
+import { useAuth } from "../contexts/AuthContext";
 
 interface PropertyDetailPageProps {
   propertyId?: string;
-  onNavigate: (page: string, id?: string) => void;
+  onNavigate?: (page: string, id?: string) => void;
 }
 
-// Mock property data
-const mockProperty = {
-  id: "1",
-  title: "Premium Residential Plot",
-  location: "Whitefield, Bangalore",
-  price: "₹85 L",
-  type: "Residential Plot",
-  dimensions: "40 x 60 ft",
-  area: "2,400 sq ft",
-  facing: "East Facing",
-  plotType: "Corner Plot",
-  zoning: "Residential",
-  featured: true,
-  description: "This premium residential plot offers excellent investment potential in the rapidly developing Whitefield area. The plot is ready for construction with all necessary approvals in place. Located in a well-planned layout with wide roads, proper drainage, and excellent connectivity to IT parks and the airport.",
-  features: [
-    "Clear Title",
-    "DTCP Approved",
-    "Ready for Construction",
-    "Corner Plot",
-    "Wide Road Access",
-    "Proper Drainage",
-    "Electricity Connection",
-    "Water Connection Available"
-  ],
-  plotDetails: {
-    soilType: "Red Soil",
-    waterLevel: "20 feet",
-    roadWidth: "40 feet",
-    boundaryWall: "Available",
-    utilities: ["Electricity", "Water", "Sewage"],
-    approvals: ["DTCP", "BMRDA", "Gram Panchayat"]
-  },
-  images: [
-    "https://images.unsplash.com/photo-1703222422733-9f63e66f2912?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2YWNhbnQlMjBsYW5kJTIwcGxvdCUyMHJlc2lkZW50aWFsfGVufDF8fHx8MTc1NzMyNzY0OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    "https://images.unsplash.com/photo-1672421187802-e7e2ee8a2e82?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbXB0eSUyMGxhbmQlMjBjb25zdHJ1Y3Rpb24lMjBzaXRlfGVufDF8fHx8MTc1NzMyNzY1OXww&ixlib=rb-4.1.0&q=80&w=1080",
-    "https://images.unsplash.com/photo-1624000476670-08f63127e0be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdWJ1cmJhbiUyMGxhbmQlMjBwbG90JTIwZGV2ZWxvcG1lbnR8ZW58MXx8fHwxNzU3MzI3NjY3fDA&ixlib=rb-4.1.0&q=80&w=1080"
-  ],
-  agent: {
-    id: "1",
-    name: "Priya Sharma",
-    title: "Senior Land Consultant",
-    rating: 4.9,
-    reviews: 127,
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b734?w=150&h=150&fit=crop&crop=face",
-    phone: "+91 98765 43210",
-    email: "priya@bhoolink.com"
-  },
-  nearbyPlaces: [
-    { name: "ITPL", distance: "2.5 km", type: "IT Park" },
-    { name: "Whitefield Railway Station", distance: "3.2 km", type: "Transport" },
-    { name: "Columbia Asia Hospital", distance: "1.8 km", type: "Healthcare" },
-    { name: "Ryan International School", distance: "1.5 km", type: "Education" }
-  ]
-};
 
 export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPageProps) {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [property, setProperty] = useState<Property | null>(null);
+  const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showAllImages, setShowAllImages] = useState(false);
 
+  // Fetch property data
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        setLoading(true);
+        const propertyIdToUse = propertyId || id;
+        if (propertyIdToUse) {
+          const response = await propertyService.getProperty(propertyIdToUse);
+          if (response.success) {
+            setProperty(response.data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching property:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
+  }, [propertyId, id]);
+
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === mockProperty.images.length - 1 ? 0 : prev + 1
-    );
+    if (property?.images && property.images.length > 0) {
+      setCurrentImageIndex((prev) => 
+        prev === property.images.length - 1 ? 0 : prev + 1
+      );
+    }
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? mockProperty.images.length - 1 : prev - 1
-    );
+    if (property?.images && property.images.length > 0) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? property.images.length - 1 : prev - 1
+      );
+    }
   };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-      />
-    ));
+
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(1)} Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(1)} L`;
+    } else {
+      return `₹${price.toLocaleString()}`;
+    }
   };
+
+  const handleBack = () => {
+    if (onNavigate) {
+      onNavigate('properties');
+    } else {
+      navigate('/properties');
+    }
+  };
+
+  const handleLogin = () => {
+    if (onNavigate) {
+      onNavigate('signin');
+    } else {
+      navigate('/signin');
+    }
+  };
+ 
+  if(!isAuthenticated){
+    navigate('/signin');
+  }
+  // Check if user is authenticated
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading property details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h2>
+          <p className="text-gray-600 mb-6">The property you're looking for doesn't exist or has been removed.</p>
+          <Button onClick={handleBack} className="bg-blue-600 hover:bg-blue-700">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Properties
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,7 +142,7 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button
             variant="ghost"
-            onClick={() => onNavigate('properties')}
+            onClick={handleBack}
             className="flex items-center space-x-2 text-gray-600 hover:text-blue-600"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -135,41 +159,71 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
             <Card className="overflow-hidden bg-white">
               <div className="relative">
                 <div className="aspect-video overflow-hidden">
-                  <ImageWithFallback
-                    src={mockProperty.images[currentImageIndex]}
-                    alt={mockProperty.title}
-                    className="w-full h-full object-cover"
-                  />
+                  {property.images && property.images.length > 0 ? (
+                    <img
+                      src={`http://localhost:5000${property.images[currentImageIndex].url}`}
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                      crossOrigin="anonymous"
+                      onError={(e) => {
+                        console.error('Image failed to load:', e.currentTarget.src);
+                        e.currentTarget.style.display = 'none';
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (nextElement) {
+                          nextElement.style.display = 'flex';
+                        }
+                      }}
+                      onLoad={() => {
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className="w-full h-full flex items-center justify-center bg-gray-100"
+                    style={{ display: property.images && property.images.length > 0 ? 'none' : 'flex' }}
+                  >
+                    <div className="text-center text-gray-400">
+                      <div className="text-4xl mb-2">🏠</div>
+                      <div className="text-sm">No Images Available</div>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* Navigation Arrows */}
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 rounded-full p-2 hover:bg-white transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 rounded-full p-2 hover:bg-white transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
+                {/* Navigation Arrows - only show if multiple images */}
+                {property.images && property.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 rounded-full p-2 hover:bg-white transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 rounded-full p-2 hover:bg-white transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
 
                 {/* Image Counter */}
-                <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                  {currentImageIndex + 1} / {mockProperty.images.length}
-                </div>
+                {property.images && property.images.length > 1 && (
+                  <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                    {currentImageIndex + 1} / {property.images.length}
+                  </div>
+                )}
 
                 {/* Show All Photos Button */}
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAllImages(true)}
-                  className="absolute bottom-4 right-4 bg-white"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Show All Photos
-                </Button>
+                {property.images && property.images.length > 1 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAllImages(true)}
+                    className="absolute bottom-4 right-4 bg-white"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Show All Photos
+                  </Button>
+                )}
 
                 {/* Top Actions */}
                 <div className="absolute top-4 right-4 flex space-x-2">
@@ -184,7 +238,7 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
                   </button>
                 </div>
 
-                {mockProperty.featured && (
+                {property.isFeatured && (
                   <Badge className="absolute top-4 left-4 bg-blue-600 text-white">
                     Featured
                   </Badge>
@@ -192,25 +246,34 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
               </div>
 
               {/* Thumbnail Strip */}
-              <div className="p-4 border-t border-gray-100">
-                <div className="flex space-x-3 overflow-x-auto">
-                  {mockProperty.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`relative flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                        index === currentImageIndex ? 'border-blue-600' : 'border-gray-200'
-                      }`}
-                    >
-                      <ImageWithFallback
-                        src={image}
-                        alt={`View ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
+              {property.images && property.images.length > 1 && (
+                <div className="p-4 border-t border-gray-100">
+                  <div className="flex space-x-3 overflow-x-auto">
+                    {property.images.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`relative flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
+                          index === currentImageIndex ? 'border-blue-600' : 'border-gray-200'
+                        }`}
+                      >
+                        <img
+                          src={`http://localhost:5000${image.url}`}
+                          alt={`View ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          crossOrigin="anonymous"
+                          onError={(e) => {
+                            console.error('Thumbnail image failed to load:', e.currentTarget.src);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                          onLoad={() => {
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </Card>
 
             {/* Property Information */}
@@ -218,18 +281,23 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
               <div className="space-y-6">
                 {/* Header */}
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{mockProperty.title}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{property.title}</h1>
                   <p className="text-lg text-gray-600 flex items-center">
                     <MapPin className="w-5 h-5 mr-2" />
-                    {mockProperty.location}
+                    {property.location.city}, {property.location.state}
                   </p>
                 </div>
 
                 {/* Price & Type */}
                 <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold text-blue-600">{mockProperty.price}</span>
+                  <span className="text-4xl font-bold text-blue-600">
+                    {formatPrice(property.price)}
+                    {property.listingType === 'rent' && (
+                      <span className="text-sm font-normal text-gray-600">/month</span>
+                    )}
+                  </span>
                   <Badge variant="outline" className="text-gray-700 border-gray-300 text-lg px-4 py-2">
-                    {mockProperty.type}
+                    {property.propertyType}
                   </Badge>
                 </div>
 
@@ -237,107 +305,129 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <Square className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                    <div className="font-semibold text-gray-900">{mockProperty.area}</div>
+                    <div className="font-semibold text-gray-900">{property.area.value} {property.area.unit}</div>
                     <div className="text-sm text-gray-600">Total Area</div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4 text-center">
-                    <div className="w-6 h-6 mx-auto mb-2 text-gray-600 flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-gray-600"></div>
+                  {property.bedrooms > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 text-center">
+                      <Bed className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                      <div className="font-semibold text-gray-900">{property.bedrooms}</div>
+                      <div className="text-sm text-gray-600">Bedrooms</div>
                     </div>
-                    <div className="font-semibold text-gray-900">{mockProperty.dimensions}</div>
-                    <div className="text-sm text-gray-600">Dimensions</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4 text-center">
-                    <TreePine className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                    <div className="font-semibold text-gray-900">{mockProperty.facing}</div>
-                    <div className="text-sm text-gray-600">Facing</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4 text-center">
-                    <Shield className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                    <div className="font-semibold text-gray-900">{mockProperty.plotType}</div>
-                    <div className="text-sm text-gray-600">Plot Type</div>
-                  </div>
+                  )}
+                  {property.bathrooms > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 text-center">
+                      <Bath className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                      <div className="font-semibold text-gray-900">{property.bathrooms}</div>
+                      <div className="text-sm text-gray-600">Bathrooms</div>
+                    </div>
+                  )}
+                  {property.facing && (
+                    <div className="bg-gray-50 rounded-lg p-4 text-center">
+                      <TreePine className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                      <div className="font-semibold text-gray-900 capitalize">{property.facing}</div>
+                      <div className="text-sm text-gray-600">Facing</div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Description */}
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">Description</h3>
-                  <p className="text-gray-600 leading-relaxed">{mockProperty.description}</p>
+                  <p className="text-gray-600 leading-relaxed">{property.description}</p>
                 </div>
 
-                {/* Plot Specifications */}
+                {/* Property Specifications */}
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Plot Specifications</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Property Specifications</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Soil Type:</span>
-                        <span className="font-medium text-gray-900">{mockProperty.plotDetails.soilType}</span>
+                        <span className="text-gray-600">Property Type:</span>
+                        <span className="font-medium text-gray-900 capitalize">{property.propertyType}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Water Level:</span>
-                        <span className="font-medium text-gray-900">{mockProperty.plotDetails.waterLevel}</span>
+                        <span className="text-gray-600">Listing Type:</span>
+                        <span className="font-medium text-gray-900 capitalize">{property.listingType}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Road Width:</span>
-                        <span className="font-medium text-gray-900">{mockProperty.plotDetails.roadWidth}</span>
+                        <span className="text-gray-600">Furnished:</span>
+                        <span className="font-medium text-gray-900 capitalize">{property.furnished}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Boundary Wall:</span>
-                        <span className="font-medium text-gray-900">{mockProperty.plotDetails.boundaryWall}</span>
+                        <span className="text-gray-600">Age:</span>
+                        <span className="font-medium text-gray-900">{property.age} years</span>
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <div>
-                        <span className="text-gray-600 block mb-2">Available Utilities:</span>
-                        <div className="flex flex-wrap gap-2">
-                          {mockProperty.plotDetails.utilities.map((utility, index) => (
-                            <Badge key={index} variant="outline" className="text-green-700 border-green-300">
-                              {utility}
-                            </Badge>
-                          ))}
-                        </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Floors:</span>
+                        <span className="font-medium text-gray-900">{property.floors}</span>
                       </div>
-                      <div>
-                        <span className="text-gray-600 block mb-2">Approvals:</span>
-                        <div className="flex flex-wrap gap-2">
-                          {mockProperty.plotDetails.approvals.map((approval, index) => (
-                            <Badge key={index} variant="outline" className="text-blue-700 border-blue-300">
-                              {approval}
-                            </Badge>
-                          ))}
-                        </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Parking:</span>
+                        <span className="font-medium text-gray-900">{property.parking} spaces</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Balcony:</span>
+                        <span className="font-medium text-gray-900">{property.balcony}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Views:</span>
+                        <span className="font-medium text-gray-900">{property.views}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Features */}
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Key Features</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {mockProperty.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-gray-700">{feature}</span>
-                      </div>
-                    ))}
+                {/* Amenities */}
+                {property.amenities && property.amenities.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {property.amenities.map((amenity, index) => (
+                        <Badge key={index} variant="outline" className="text-blue-700 border-blue-300">
+                          {amenity}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Nearby Places */}
+                {/* Contact Information */}
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">What's Nearby</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {mockProperty.nearbyPlaces.map((place, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <div className="font-medium text-gray-900">{place.name}</div>
-                          <div className="text-sm text-gray-600">{place.type}</div>
-                        </div>
-                        <div className="text-sm font-medium text-blue-600">{place.distance}</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Contact Name:</span>
+                        <span className="font-medium text-gray-900">{property.contact.name}</span>
                       </div>
-                    ))}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Phone:</span>
+                        <span className="font-medium text-gray-900">{property.contact.phone}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Email:</span>
+                        <span className="font-medium text-gray-900">{property.contact.email}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Address:</span>
+                        <span className="font-medium text-gray-900">{property.location.address}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Pincode:</span>
+                        <span className="font-medium text-gray-900">{property.location.pincode}</span>
+                      </div>
+                      {property.location.landmark && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Landmark:</span>
+                          <span className="font-medium text-gray-900">{property.location.landmark}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -346,28 +436,21 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Contact Agent */}
+            {/* Contact Information */}
             <Card className="p-6 bg-white sticky top-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Contact Agent</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h3>
               
-              <div className="flex items-center space-x-4 mb-6">
-                <Avatar className="w-16 h-16">
-                  <img src={mockProperty.agent.image} alt={mockProperty.agent.name} className="w-full h-full object-cover" />
-                </Avatar>
+              <div className="space-y-4 mb-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900">{mockProperty.agent.name}</h4>
-                  <p className="text-sm text-gray-600">{mockProperty.agent.title}</p>
-                  <div className="flex items-center space-x-1 mt-1">
-                    {renderStars(mockProperty.agent.rating)}
-                    <span className="text-sm text-gray-600 ml-2">({mockProperty.agent.reviews} reviews)</span>
-                  </div>
+                  <h4 className="font-semibold text-gray-900">{property.contact.name}</h4>
+                  <p className="text-sm text-gray-600">Property Contact</p>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <Button className="w-full bg-blue-600 hover:bg-blue-700">
                   <Phone className="w-4 h-4 mr-2" />
-                  Call {mockProperty.agent.phone}
+                  Call {property.contact.phone}
                 </Button>
                 <Button variant="outline" className="w-full">
                   <Mail className="w-4 h-4 mr-2" />
@@ -381,40 +464,41 @@ export function PropertyDetailPage({ propertyId, onNavigate }: PropertyDetailPag
 
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <p className="text-sm text-gray-600 text-center">
-                  Trusted land consultant with verified credentials
+                  Contact the property owner directly
                 </p>
               </div>
             </Card>
 
-            {/* Similar Plots */}
+            {/* Property Status */}
             <Card className="p-6 bg-white">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Similar Plots</h3>
-              <div className="space-y-4">
-                {[
-                  { title: "Agricultural Land", location: "Devanahalli, Bangalore", price: "₹45 L", image: "https://images.unsplash.com/photo-1732275115492-13041e773431?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZ3JpY3VsdHVyYWwlMjBsYW5kJTIwZmFybWxhbmQlMjBwbG90fGVufDF8fHx8MTc1NzMyNzY1MXww&ixlib=rb-4.1.0&q=80&w=150" },
-                  { title: "Commercial Plot", location: "Electronic City, Bangalore", price: "₹1.2 Cr", image: "https://images.unsplash.com/photo-1685266325930-ffe4937f6eb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tZXJjaWFsJTIwbGFuZCUyMGRldmVsb3BtZW50JTIwcGxvdHxlbnwxfHx8fDE3NTczMjc2NTV8MA&ixlib=rb-4.1.0&q=80&w=150" },
-                  { title: "Ready-to-Build Plot", location: "Sarjapur Road, Bangalore", price: "₹95 L", image: "https://images.unsplash.com/photo-1672421187802-e7e2ee8a2e82?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbXB0eSUyMGxhbmQlMjBjb25zdHJ1Y3Rpb24lMjBzaXRlfGVufDF8fHx8MTc1NzMyNzY1OXww&ixlib=rb-4.1.0&q=80&w=150" }
-                ].map((item, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer">
-                    <div className="flex space-x-3">
-                      <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        <ImageWithFallback
-                          src={item.image}
-                          alt={item.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-900 truncate">{item.title}</h4>
-                        <p className="text-sm text-gray-600 truncate">{item.location}</p>
-                        <p className="text-sm font-semibold text-blue-600">{item.price}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full mt-4">
-                  View More Plots
-                </Button>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Property Status</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Status:</span>
+                  <Badge className={property.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                    {property.status}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Active:</span>
+                  <Badge className={property.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                    {property.isActive ? 'Yes' : 'No'}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Featured:</span>
+                  <Badge className={property.isFeatured ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}>
+                    {property.isFeatured ? 'Yes' : 'No'}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Views:</span>
+                  <span className="font-medium text-gray-900">{property.views}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Listed:</span>
+                  <span className="font-medium text-gray-900">{new Date(property.createdAt).toLocaleDateString()}</span>
+                </div>
               </div>
             </Card>
           </div>

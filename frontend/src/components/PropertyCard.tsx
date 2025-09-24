@@ -38,15 +38,44 @@ export function PropertyCard({
   facing,
   onNavigate,
 }: PropertyCardProps) {
+  
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
       {/* Image */}
       <div className="relative overflow-hidden">
-        <ImageWithFallback
-          src={image}
-          alt={title}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        {image && !image.includes('unsplash.com') ? (
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            crossOrigin="anonymous"
+            onError={(e) => {
+              console.error('Image failed to load:', image);
+              console.error('Error event:', e);
+              // Try alternative URL if first fails
+              if (image && image.includes('/uploads/')) {
+                const altSrc = `http://localhost:5000/uploads/${image.split('/').pop()}`;
+                e.currentTarget.src = altSrc;
+                e.currentTarget.onerror = () => {
+                  console.error('Alternative URL also failed');
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling.style.display = 'flex';
+                };
+              }
+            }}
+            onLoad={() => {
+            }}
+          />
+        ) : null}
+        <div 
+          className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
+          style={{ display: image && !image.includes('unsplash.com') ? 'none' : 'flex' }}
+        >
+          <div className="text-gray-400 text-center">
+            <div className="text-4xl mb-2">🏠</div>
+            <div className="text-sm">No Image</div>
+          </div>
+        </div>
         
         {/* Badges */}
         <div className="absolute top-3 left-3">

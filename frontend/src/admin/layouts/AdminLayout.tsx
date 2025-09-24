@@ -6,12 +6,11 @@ import {
   Plus, 
   List, 
   Users, 
-  Settings, 
   LogOut,
   Menu,
   X,
-  BarChart3,
-  ImageIcon
+  ImageIcon,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -25,16 +24,15 @@ const AdminLayout = () => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
     { id: 'properties', label: 'Properties', icon: Home, path: '/admin/properties' },
-    { id: 'add-property', label: 'Add Property', icon: Plus, path: '/admin/properties/add' },
-    { id: 'users', label: 'Users', icon: Users, path: '/admin/users' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
-    { id: 'media', label: 'Media', icon: ImageIcon, path: '/admin/media' },
-    { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
+    { id: 'blogs', label: 'Blog Management', icon: FileText, path: '/admin/blogs' },
+    { id: 'users', label: 'User Management', icon: Users, path: '/admin/users' },
   ];
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
-    navigate('/admin/login');
+    localStorage.removeItem('adminUser');
+    // Use window.location.replace to bypass all React Router logic
+    window.location.replace('/');
   };
 
   const isActive = (path: string) => {

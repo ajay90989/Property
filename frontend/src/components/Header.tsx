@@ -2,21 +2,19 @@ import { Button } from "./ui/button";
 import { Home, Building, FileText, Phone, Menu, Shield, User, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-interface HeaderProps {
-  currentPage: string;
-  onNavigate: (page: string) => void;
-}
-
-export function Header({ currentPage, onNavigate }: HeaderProps) {
+export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const isActive = (page: string) => currentPage === page;
+  const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
     logout();
-    onNavigate('home');
+    navigate('/');
   };
 
   return (
@@ -33,42 +31,42 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <button 
-              onClick={() => onNavigate('home')}
+            <Link 
+              to="/"
               className={`flex items-center space-x-2 transition-colors ${
-                isActive('home') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                isActive('/') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
               }`}
             >
               <Home className="w-4 h-4" />
               <span className="leading-none">Home</span>
-            </button>
-            <button 
-              onClick={() => onNavigate('properties')}
+            </Link>
+            {/* <Link 
+              to="/properties"
               className={`flex items-center space-x-2 transition-colors ${
-                isActive('properties') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                isActive('/properties') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
               }`}
             >
               <Building className="w-4 h-4" />
-              <span className="leading-none">Plots & Land</span>
-            </button>
-            <button 
-              onClick={() => onNavigate('blog')}
+              <span className="leading-none">Properties</span>
+            </Link> */}
+            <Link 
+              to="/blog"
               className={`flex items-center space-x-2 transition-colors ${
-                isActive('blog') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                isActive('/blog') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
               }`}
             >
               <FileText className="w-4 h-4" />
               <span className="leading-none">Blog</span>
-            </button>
-            <button 
-              onClick={() => onNavigate('contact')}
+            </Link>
+            <Link 
+              to="/contact"
               className={`flex items-center space-x-2 transition-colors ${
-                isActive('contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
               }`}
             >
               <Phone className="w-4 h-4" />
               <span className="leading-none">Contact</span>
-            </button>
+            </Link>
           </nav>
 
           {/* Desktop CTA */}
@@ -91,12 +89,13 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
               </div>
             ) : (
               <>
-                <Button 
-                  variant="outline" 
-                  onClick={() => onNavigate('signin')}
-                >
-                  Sign In
-                </Button>
+                <Link to="/signin">
+                  <Button 
+                    variant="outline"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
               </>
             )}
           </div>
@@ -114,54 +113,46 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-100">
             <div className="flex flex-col space-y-3">
-              <button 
-                onClick={() => {
-                  onNavigate('home');
-                  setIsMobileMenuOpen(false);
-                }}
+              <Link 
+                to="/"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center space-x-3 py-2 transition-colors ${
-                  isActive('home') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  isActive('/') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
                 }`}
               >
                 <Home className="w-4 h-4" />
                 <span className="leading-none">Home</span>
-              </button>
-              <button 
-                onClick={() => {
-                  onNavigate('properties');
-                  setIsMobileMenuOpen(false);
-                }}
+              </Link>
+              <Link 
+                to="/properties"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center space-x-3 py-2 transition-colors ${
-                  isActive('properties') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  isActive('/properties') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
                 }`}
               >
                 <Building className="w-4 h-4" />
-                <span className="leading-none">Plots & Land</span>
-              </button>
-              <button 
-                onClick={() => {
-                  onNavigate('blog');
-                  setIsMobileMenuOpen(false);
-                }}
+                <span className="leading-none">Properties</span>
+              </Link>
+              <Link 
+                to="/blog"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center space-x-3 py-2 transition-colors ${
-                  isActive('blog') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  isActive('/blog') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
                 }`}
               >
                 <FileText className="w-4 h-4" />
                 <span className="leading-none">Blog</span>
-              </button>
-              <button 
-                onClick={() => {
-                  onNavigate('contact');
-                  setIsMobileMenuOpen(false);
-                }}
+              </Link>
+              <Link 
+                to="/contact"
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center space-x-3 py-2 transition-colors ${
-                  isActive('contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
                 }`}
               >
                 <Phone className="w-4 h-4" />
                 <span className="leading-none">Contact</span>
-              </button>
+              </Link>
               <div className="pt-4 space-y-2">
                 {isAuthenticated ? (
                   <>
@@ -183,16 +174,18 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
                   </>
                 ) : (
                   <>
-                    <Button 
-                      variant="outline" 
+                    <Link 
+                      to="/signin"
+                      onClick={() => setIsMobileMenuOpen(false)}
                       className="w-full"
-                      onClick={() => {
-                        onNavigate('signin');
-                        setIsMobileMenuOpen(false);
-                      }}
                     >
-                      Sign In
-                    </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                      >
+                        Sign In
+                      </Button>
+                    </Link>
                     <Button 
                       variant="ghost" 
                       className="w-full"

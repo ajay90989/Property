@@ -6,6 +6,11 @@ import AdminLogin from './pages/AdminLogin';
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import AddProperty from './pages/AddProperty';
+import EditProperty from './pages/EditProperty';
+import BlogManagement from './pages/BlogManagement';
+import AddBlog from './pages/AddBlog';
+import EditBlog from './pages/EditBlog';
+import UserManagement from './pages/UserManagement';
 
 const AdminApp = () => {
   return (
@@ -22,10 +27,12 @@ const AdminApp = () => {
           <Route index element={<Dashboard />} />
           <Route path="properties" element={<Properties />} />
           <Route path="properties/add" element={<AddProperty />} />
-          <Route path="properties/edit/:id" element={<AddProperty />} />
-          <Route path="users" element={<div className="p-6"><h1 className="text-2xl font-bold">Users Management</h1><p className="text-gray-600">Coming soon...</p></div>} />
+          <Route path="properties/edit/:id" element={<EditProperty />} />
+          <Route path="blogs" element={<BlogManagement />} />
+          <Route path="blogs/add" element={<AddBlog />} />
+          <Route path="blogs/edit/:id" element={<EditBlog />} />
+          <Route path="users" element={<UserManagement />} />
           <Route path="analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analytics</h1><p className="text-gray-600">Coming soon...</p></div>} />
-          <Route path="media" element={<div className="p-6"><h1 className="text-2xl font-bold">Media Library</h1><p className="text-gray-600">Coming soon...</p></div>} />
           <Route path="settings" element={<div className="p-6"><h1 className="text-2xl font-bold">Settings</h1><p className="text-gray-600">Coming soon...</p></div>} />
         </Route>
         

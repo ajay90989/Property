@@ -67,7 +67,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (userData: User, userToken: string) => {
-    console.log('AuthContext login called with:', userData);
     setUser(userData);
     setToken(userToken);
     

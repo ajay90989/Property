@@ -1,10 +1,7 @@
 import { Building, Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 
-interface FooterProps {
-  onNavigate: (page: string) => void;
-}
-
-export function Footer({ onNavigate }: FooterProps) {
+export function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -40,11 +37,11 @@ export function Footer({ onNavigate }: FooterProps) {
           <div>
             <h3 className="font-semibold mb-6">Quick Links</h3>
             <ul className="space-y-3">
-              <li><button onClick={() => onNavigate('home')} className="text-gray-300 hover:text-white transition-colors">Home</button></li>
-              <li><button onClick={() => onNavigate('properties')} className="text-gray-300 hover:text-white transition-colors">Plots & Land</button></li>
-              <li><button onClick={() => onNavigate('properties')} className="text-gray-300 hover:text-white transition-colors">Development Projects</button></li>
-              <li><button onClick={() => onNavigate('blog')} className="text-gray-300 hover:text-white transition-colors">Blog</button></li>
-              <li><button onClick={() => onNavigate('contact')} className="text-gray-300 hover:text-white transition-colors">Contact</button></li>
+              <li><Link to="/" className="text-gray-300 hover:text-white transition-colors">Home</Link></li>
+              <li><Link to="/properties" className="text-gray-300 hover:text-white transition-colors">Properties</Link></li>
+              <li><Link to="/properties" className="text-gray-300 hover:text-white transition-colors">Development Projects</Link></li>
+              <li><Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
 

@@ -1,60 +1,79 @@
 import { PropertyCard } from "./PropertyCard";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { propertyService } from "../services/propertyService";
+
+interface Property {
+  _id: string;
+  title: string;
+  location: {
+    city?: string;
+    state?: string;
+    address?: string;
+  };
+  price: number;
+  images?: Array<{
+    url: string;
+    alt?: string;
+    isPrimary?: boolean;
+  }>;
+  bedrooms: number;
+  bathrooms: number;
+  area: {
+    value: number;
+    unit: string;
+  };
+  propertyType: string;
+  listingType: string;
+  isActive: boolean;
+}
 
 interface FeaturedPropertiesProps {
   onNavigate?: (page: string, id?: string) => void;
+  showResults?: boolean;
+  filters?: any;
 }
 
-export function FeaturedProperties({ onNavigate }: FeaturedPropertiesProps) {
-  const featuredProperties = [
-    {
-      id: "1",
-      title: "Premium Residential Plot",
-      location: "Whitefield, Bangalore",
-      price: "₹85 L",
-      image: "https://images.unsplash.com/photo-1703222422733-9f63e66f2912?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2YWNhbnQlMjBsYW5kJTIwcGxvdCUyMHJlc2lkZW50aWFsfGVufDF8fHx8MTc1NzMyNzY0OHww&ixlib=rb-4.1.0&q=80&w=1080",
-      beds: undefined,
-      baths: undefined,
-      area: "2,400 sq ft",
-      type: "Residential Plot",
-      rating: 4.8,
-      isVerified: true,
-      dimensions: "40 x 60 ft",
-      facing: "East Facing"
-    },
-    {
-      id: "2",
-      title: "Agricultural Farmland",
-      location: "Devanahalli, Bangalore",
-      price: "₹45 L",
-      image: "https://images.unsplash.com/photo-1732275115492-13041e773431?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZ3JpY3VsdHVyYWwlMjBsYW5kJTIwZmFybWxhbmQlMjBwbG90fGVufDF8fHx8MTc1NzMyNzY1MXww&ixlib=rb-4.1.0&q=80&w=1080",
-      beds: undefined,
-      baths: undefined,
-      area: "5 Acres",
-      type: "Agricultural Land",
-      rating: 4.6,
-      isVerified: true,
-      isFavorited: true,
-      dimensions: "200 x 300 ft",
-      facing: "South Facing"
-    },
-    {
-      id: "3",
-      title: "Commercial Development Plot",
-      location: "Cyber City, Gurgaon",
-      price: "₹2.8 Cr",
-      image: "https://images.unsplash.com/photo-1685266325930-ffe4937f6eb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tZXJjaWFsJTIwbGFuZCUyMGRldmVsb3BtZW50JTIwcGxvdHxlbnwxfHx8fDE3NTczMjc2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      beds: undefined,
-      baths: undefined,
-      area: "8,500 sq ft",
-      type: "Commercial Plot",
-      rating: 4.7,
-      isVerified: true,
-      dimensions: "85 x 100 ft",
-      facing: "Main Road Facing"
-    },
-  ];
+export function FeaturedProperties({ onNavigate, showResults = false, filters }: FeaturedPropertiesProps) {
+  const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch featured properties from API
+  useEffect(() => {
+    const fetchFeaturedProperties = async () => {
+      try {
+        setLoading(true);
+        
+        let response;
+        if (filters && Object.keys(filters).length > 0) {
+          // Use filtered properties API
+          response = await propertyService.getProperties(filters);
+        } else {
+          // Use featured properties API
+          response = await propertyService.getFeaturedProperties();
+        }
+        
+        if (response.success) {
+          setFeaturedProperties(response.data || []);
+        } else {
+          setFeaturedProperties([]);
+        }
+      } catch (error) {
+        console.error('Error fetching featured properties:', error);
+        setFeaturedProperties([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProperties();
+  }, [filters]);
+
+  // Don't show featured properties if search results are being displayed
+  if (showResults) {
+    return null;
+  }
 
   return (
     <section className="py-16 lg:py-20 bg-gray-50">
@@ -70,11 +89,69 @@ export function FeaturedProperties({ onNavigate }: FeaturedPropertiesProps) {
         </div>
 
         {/* Property Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
-          {featuredProperties.map((property) => (
-            <PropertyCard key={property.id} {...property} onNavigate={onNavigate} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
+                <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
+                <div className="flex justify-between">
+                  <div className="h-8 bg-gray-200 rounded w-20"></div>
+                  <div className="h-8 bg-gray-200 rounded w-24"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : featuredProperties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+           
+            {featuredProperties.map((property) => {
+           
+              return (
+              <PropertyCard 
+                key={property._id} 
+                id={property._id}
+                title={property.title}
+                location={property.location?.city && property.location?.state 
+                  ? `${property.location.city}, ${property.location.state}` 
+                  : property.location?.city || property.location?.state || 'Location not specified'}
+                price={`₹${(property.price).toFixed(1)}L`}
+                image={property.images && property.images.length > 0 ? 
+                  `http://localhost:5000${property.images[0].url}` : 
+                  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&h=300&fit=crop&crop=center'}
+                beds={property.bedrooms}
+                baths={property.bathrooms}
+                area={`${property.area?.value || 0} ${property.area?.unit || 'sqft'}`}
+                type={property.propertyType}
+                rating={4.5}
+                isVerified={true}
+                onNavigate={(page, id) => {
+                  if (page === 'property' && id) {
+                    window.location.href = `/property/${id}`;
+                  } else if (onNavigate) {
+                    onNavigate(page, id);
+                  }
+                }}
+              />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              {filters && Object.keys(filters).length > 0 
+                ? "No properties found matching your criteria. Try adjusting your filters." 
+                : "No featured properties available at the moment."}
+            </p>
+            {filters && Object.keys(filters).length > 0 && (
+              <p className="text-gray-400 text-sm mt-2">
+                Applied filters: {Object.entries(filters).map(([key, value]) => `${key}: ${value}`).join(', ')}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* View All Button */}
         <div className="text-center">
