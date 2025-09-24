@@ -12,7 +12,7 @@ export function Footer() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                 <Building className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-semibold">BhooLink</span>
+              <span className="text-xl font-semibold">Property</span>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
               Your trusted gateway to prime land investments. Discover verified plots and development opportunities across India.

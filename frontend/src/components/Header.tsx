@@ -26,7 +26,7 @@ export function Header() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
               <Building className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold text-gray-900 leading-none">BhooLink</span>
+            <span className="text-xl font-semibold text-gray-900 leading-none">Property</span>
           </div>
 
           {/* Desktop Navigation */}

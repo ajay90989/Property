@@ -46,7 +46,7 @@ export function Features() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Why Choose BhooLink?
+            Why Choose Property?
           </h2>
           <p className="text-lg text-gray-600">
             Experience the difference with our comprehensive real estate platform designed for modern property seekers
@@ -77,7 +77,7 @@ export function Features() {
               Ready to Find Your Dream Property?
             </h3>
             <p className="text-lg text-gray-600 mb-6">
-              Join thousands of satisfied customers who found their perfect property through BhooLink
+              Join thousands of satisfied customers who found their perfect property through Property
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <button className="bg-blue-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors">
