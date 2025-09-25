@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = 'https://property-u6i3.onrender.com/';
+export const API_BASE_URL = 'https://property-u6i3.onrender.com';
 
 // Helper function to get full image URL
 export const getImageUrl = (imagePath: string): string => {

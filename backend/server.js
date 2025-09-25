@@ -31,7 +31,7 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:3000", "http://localhost:5173"],
+            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:3000", "http://localhost:5173", "https://property-u6i3.onrender.com", "*"],
             scriptSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             connectSrc: ["'self'", "http://localhost:5000"]
@@ -78,7 +78,7 @@ if (process.env.NODE_ENV === 'development') {
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
     setHeaders: (res, path) => {
-       
+
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET');
         res.setHeader('Cache-Control', 'public, max-age=31536000');
@@ -87,7 +87,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 
 // Debug static file serving
 app.get('/uploads/*', (req, res) => {
-   
+
     res.sendFile(path.join(__dirname, 'uploads', req.path.replace('/uploads/', '')));
 });
 
@@ -128,7 +128,7 @@ app.get('/api/test-image/:filename', (req, res) => {
     const filename = req.params.filename;
     const imagePath = path.join(__dirname, 'uploads', filename);
 
-   
+
 
     if (require('fs').existsSync(imagePath)) {
         res.sendFile(imagePath);
