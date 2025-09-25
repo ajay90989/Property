@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
@@ -26,48 +25,33 @@ connectDB();
 
 const app = express();
 
-// Security middleware with image support
+// Environment variables for allowed origins
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean);
+// Example in .env: ALLOWED_ORIGINS=http://localhost:3000,https://myfrontend.vercel.app
+
+// Security middleware with dynamic domains
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:3000", "rontend-green-seven-73.vercel.app", "https://frontend-4ladvfbg9-ajay90989s-projects.vercel.app", "*"],
+            imgSrc: ["'self'", "data:", "*"],
             scriptSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
-            connectSrc: ["'self'", "http://localhost:5000"]
+            connectSrc: ["'self'"]
         }
     }
 }));
 
-// CORS configuration - More permissive for development
+// CORS configuration - dynamic domains
 app.use(cors({
-    origin: [
-        "https://frontend-4ladvfbg9-ajay90989s-projects.vercel.app", "*",
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:5173',
-        'http://127.0.0.1:3000',
-        'rontend-green-seven-73.vercel.app',
-        process.env.CLIENT_URL
-    ].filter(Boolean),
+    origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     optionsSuccessStatus: 200
 }));
 
-// Rate limiting
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 minutes
-//     max: 100, // limit each IP to 100 requests per windowMs
-//     message: {
-//         success: false,
-//         message: 'Too many requests from this IP, please try again later.'
-//     }
-// });
-// app.use(limiter);
-
-// Body parser middleware
+// Body parser
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10000mb' }));
 
@@ -78,8 +62,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-    setHeaders: (res, path) => {
-
+    setHeaders: (res) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET');
         res.setHeader('Cache-Control', 'public, max-age=31536000');
@@ -88,7 +71,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 
 // Debug static file serving
 app.get('/uploads/*', (req, res) => {
-
     res.sendFile(path.join(__dirname, 'uploads', req.path.replace('/uploads/', '')));
 });
 
@@ -112,7 +94,7 @@ app.get('/api/test-uploads', (req, res) => {
         res.json({
             success: true,
             message: 'Uploads directory accessible',
-            files: files,
+            files,
             count: files.length
         });
     } catch (error) {
@@ -129,8 +111,6 @@ app.get('/api/test-image/:filename', (req, res) => {
     const filename = req.params.filename;
     const imagePath = path.join(__dirname, 'uploads', filename);
 
-
-
     if (require('fs').existsSync(imagePath)) {
         res.sendFile(imagePath);
     } else {
@@ -138,40 +118,6 @@ app.get('/api/test-image/:filename', (req, res) => {
             success: false,
             message: 'Image not found',
             path: imagePath
-        });
-    }
-});
-
-// Test properties API
-app.get('/api/test-properties', async (req, res) => {
-    try {
-        const Property = require('./models/Property');
-        const totalProperties = await Property.countDocuments();
-        const activeProperties = await Property.countDocuments({ isActive: true });
-        const sampleProperties = await Property.find({ isActive: true }).limit(3).lean();
-
-        res.json({
-            success: true,
-            message: 'Properties API test',
-            data: {
-                totalProperties,
-                activeProperties,
-                sampleProperties: sampleProperties.map(p => ({
-                    id: p._id,
-                    title: p.title,
-                    price: p.price,
-                    city: p.location?.city,
-                    state: p.location?.state,
-                    hasImages: p.images && p.images.length > 0,
-                    imageCount: p.images ? p.images.length : 0
-                }))
-            }
-        });
-    } catch (error) {
-        res.json({
-            success: false,
-            message: 'Properties API test failed',
-            error: error.message
         });
     }
 });
@@ -197,18 +143,14 @@ app.use('*', (req, res) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-
 const server = app.listen(PORT, () => {
-    console.log(`Server running  on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
     console.log(`Error: ${err.message}`);
-    // Close server & exit process
-    server.close(() => {
-        process.exit(1);
-    });
+    server.close(() => process.exit(1));
 });
 
 // Handle uncaught exceptions
