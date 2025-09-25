@@ -12,3 +12,15 @@
 
 // # Client URL
 // CLIENT_URL = http://localhost:3000
+
+
+
+
+// {"projectId":"prj_tIbwlWtRm16GHIE4Y8o1g88ZB8jR","orgId":"team_blYWI8XSOyLIumHBJmCi3RNO","projectName":"frontend"},
+// {
+//   "rewrites": [
+//     { "source": "/(.*)", "destination": "/" }
+//   ]
+// }
+
+// vercel--prod
