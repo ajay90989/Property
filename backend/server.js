@@ -31,7 +31,7 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:3000", "http://localhost:5173", "https://frontend-4ladvfbg9-ajay90989s-projects.vercel.app", "*"],
+            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:3000", "rontend-green-seven-73.vercel.app", "https://frontend-4ladvfbg9-ajay90989s-projects.vercel.app", "*"],
             scriptSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             connectSrc: ["'self'", "http://localhost:5000"]
@@ -47,7 +47,7 @@ app.use(cors({
         'http://localhost:3001',
         'http://localhost:5173',
         'http://127.0.0.1:3000',
-        'http://127.0.0.1:5173',
+        'rontend-green-seven-73.vercel.app',
         process.env.CLIENT_URL
     ].filter(Boolean),
     credentials: true,
