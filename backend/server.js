@@ -42,6 +42,7 @@ app.use(helmet({
 // CORS configuration - More permissive for development
 app.use(cors({
     origin: [
+        "https://property-u6i3.onrender.com", "*",
         'http://localhost:3000',
         'http://localhost:3001',
         'http://localhost:5173',
