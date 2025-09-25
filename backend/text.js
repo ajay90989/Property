@@ -1,5 +1,5 @@
 // # Database Configuration
-// MONGODB_URI = mongodb + srv://ajayworkpatidar:J80YsJzW0tOXh0vE@cluster0.3vwjdgg.mongodb.net/properties
+// MONGODB_URI = mongodb+srv://ajayworkpatidar:J80YsJzW0tOXh0vE@cluster0.3vwjdgg.mongodb.net/properties
 // DATABASE_NAME = properties
 
 // # Server Configuration
