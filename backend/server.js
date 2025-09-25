@@ -68,8 +68,8 @@ app.use(cors({
 // app.use(limiter);
 
 // Body parser middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10000mb' }));
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
