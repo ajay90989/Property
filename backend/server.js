@@ -31,7 +31,7 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:3000", "http://localhost:5173", "https://property-u6i3.onrender.com", "*"],
+            imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:3000", "http://localhost:5173", "https://frontend-jbeikbxla-ajay90989s-projects.vercel.app", "*"],
             scriptSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             connectSrc: ["'self'", "http://localhost:5000"]
@@ -42,7 +42,7 @@ app.use(helmet({
 // CORS configuration - More permissive for development
 app.use(cors({
     origin: [
-        "https://property-u6i3.onrender.com", "*",
+        "https://frontend-jbeikbxla-ajay90989s-projects.vercel.app", "*",
         'http://localhost:3000',
         'http://localhost:3001',
         'http://localhost:5173',
